@@ -1,0 +1,60 @@
+/* Optional: Add some custom styling for your modal */
+#alertBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+  }
+  
+  .bg-white {
+    border-radius: 8px;
+  }
+  
+  #alertBox .bg-white {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  /* Conteneur de l'alerte */
+#alertBox {
+  position: fixed; /* Positionne l'alerte par rapport à la fenêtre */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; /* S'assure que l'alerte est au-dessus des autres éléments */
+}
+
+/* Contenu de l'alerte */
+#alertBox .bg-white {
+  width: 90%;
+  max-width: 700px;
+  border-radius: 8px;
+  overflow: hidden;
+  animation: slideDown 0.3s ease-in-out;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Animation pour une transition fluide */
+@keyframes slideDown {
+  from {
+    transform: translateY(-20%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Boutons pour modifier ou supprimer */
+.card .btn {
+  margin-right: 5px;
+}

@@ -1,0 +1,29 @@
+<div class="chatbot-container" [class.open]="isOpen">
+  <div class="chatbot-header">
+    <h3>Assistant</h3>
+    <button class="close-btn" (click)="close()">×</button>
+  </div>
+  
+  <div class="chat-messages" #chatMessages>
+    <div *ngFor="let message of messages" 
+         [ngClass]="{'message': true, 'user-message': message.sender === 'user', 'bot-message': message.sender === 'bot'}">
+      <div class="message-content">
+        <i *ngIf="message.sender === 'bot'" class="bi bi-robot"></i>
+        <i *ngIf="message.sender === 'user'" class="bi bi-person"></i>
+        {{ message.text }}
+      </div>
+      <div class="message-time">{{ message.time | date:'shortTime' }}</div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" 
+           [(ngModel)]="userMessage" 
+           (keyup.enter)="sendMessage()"
+           placeholder="Tapez votre question ici..."
+           #messageInput>
+    <button (click)="sendMessage()" [disabled]="!userMessage.trim()">
+      <i class="bi bi-send"></i>
+    </button>
+  </div>
+</div>

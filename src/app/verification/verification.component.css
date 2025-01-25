@@ -1,0 +1,96 @@
+/* Modal Overlay (flou sans couleur) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(10px); /* Flou */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease-out;
+  z-index: 1000;
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: bounceIn 0.5s ease-out forwards; /* Animation d'alerte */
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+/* Animation pour la modal (alerte) */
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Icon Animation */
+.modal-icon .icon {
+  font-size: 48px;
+  color: #dc3545; /* Rouge pour alerte */
+  animation: shake 0.8s ease-out infinite; /* Animation tremblement */
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
+
+/* Boutons */
+.btn-outline-success {
+  background-color: #ffffff; /* Blanc */
+  color: #28a745; /* Vert */
+  border: 2px solid #28a745; /* Bordure verte */
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 12px;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-outline-success:hover {
+  background-color: #28a745; /* Remplissage vert au survol */
+  color: #ffffff; /* Texte blanc */
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+  transform: translateY(-2px); /* Légère élévation au survol */
+}
+
+/* Icône mise à jour */
+.modal-icon i {
+  font-size: 64px; /* Taille de l'icône */
+  color: #28a745; /* Vert */
+  margin-bottom: 20px;
+  animation: pulse 1.5s infinite; /* Animation de pulsation */
+}
+
+/* Animation de pulsation */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
