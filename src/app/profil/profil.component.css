@@ -1,60 +1,179 @@
-/* Optional: Add some custom styling for your modal */
-#alertBox {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 9999;
-  }
-  
-  .bg-white {
-    border-radius: 8px;
-  }
-  
-  #alertBox .bg-white {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  /* Conteneur de l'alerte */
-#alertBox {
-  position: fixed; /* Positionne l'alerte par rapport à la fenêtre */
+/* Navbar */
+.navbar {
+  background: linear-gradient(90deg, rgb(11, 58, 31), rgb(40, 118, 39));
+}
+
+/* Profile Section Background */
+.profile-container {
+  background: linear-gradient(90deg, rgb(11, 58, 31), rgb(40, 118, 39));
+  padding: 20px;
+  border-radius: 15px;
+}
+
+/* Texte clair sur le fond dégradé */
+.text-white {
+  color: #fff !important;
+}
+
+.text-light {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.profile-picture img {
+  border-color: #fff; /* Bordure blanche pour la photo de profil */
+}
+
+.card {
+  border-radius: 15px;
+}
+
+.card img {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.card-body {
+  background: #f8f9fa;
+}
+
+.card-title {
+  font-weight: bold;
+}
+/* Modal style */
+.modal {
+  position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050; /* S'assure que l'alerte est au-dessus des autres éléments */
 }
 
-/* Contenu de l'alerte */
-#alertBox .bg-white {
-  width: 90%;
-  max-width: 700px;
+.modal-content {
+  background-color: white;
+  padding: 20px;
   border-radius: 8px;
+  text-align: center;
+  width: 300px;
+}
+
+.modal-content h2 {
+  margin-bottom: 20px;
+}
+
+.modal-content button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-content button:hover {
+  background-color: #45a049;
+}
+
+.modal-content button:nth-child(2) {
+  background-color: #f44336;
+}
+
+.modal-content button:nth-child(2):hover {
+  background-color: #d32f2f;
+}
+/* 22 */
+.home-container {
+  padding: 2rem;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.product-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  animation: slideDown 0.3s ease-in-out;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s;
 }
 
-/* Animation pour une transition fluide */
-@keyframes slideDown {
-  from {
-    transform: translateY(-20%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.product-card:hover {
+  transform: translateY(-5px);
 }
 
-/* Boutons pour modifier ou supprimer */
-.card .btn {
-  margin-right: 5px;
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
 }
+
+.product-info {
+  padding: 1rem;
+}
+
+h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.description {
+  color: #666;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.price {
+  color: #007bff;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 0.5rem 0 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.edit-button, .delete-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.edit-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+

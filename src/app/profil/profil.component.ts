@@ -1,126 +1,90 @@
-import { Component , OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ServicesService } from '../services.service';
+import { ProductService,Product } from '../services/product.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';  // Ajoute FormsModule ici
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { UserService } from '../services/user.service';
+import { AuthService } from '../services/auth.service';
+
 @Component({
   selector: 'app-profil',
-  imports: [ CommonModule,FormsModule,RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './profil.component.html',
-  styleUrl: './profil.component.css'
+  styleUrls: ['./profil.component.css']
 })
 export class ProfilComponent implements OnInit {
-  products: any[] = []; // Liste des produits
-  alertVisible = false;
-  isEditing = false;
-  editingProductId: number | null = null;
-
-  productName = '';
-  productPrice = '';
-  productDescription = '';
-  productPhone = '';  // Ajouter la variable pour le téléphone
-  productEmail = '';  // Ajouter la variable pour l'email
-  previewImage = 'https://via.placeholder.com/150';
-
-  constructor(private servicesService: ServicesService) {}
-
+  showLogoutModal = false;
+  imageUrl: string | null = null; // URL de l'image de profil
+  triggerFileUpload(): void {
+    const fileInput = document.querySelector('input[type="file"]') as HTMLElement;
+    fileInput.click();
+  }
+  products: Product[] = [];
   ngOnInit() {
-    // Charger les produits depuis le service (qui récupère les produits du localStorage)
-    this.products = this.servicesService.getProducts();
+    this.productService.getProducts().subscribe(products => {
+      this.products = products;
+    });
   }
 
-  openAlert(isEditing: boolean, product?: any) {
-    this.alertVisible = true;
-    this.isEditing = isEditing;
+  onEditProduct(product: Product) {
+    this.router.navigate(['/publish-product'], { 
+      state: { 
+        product: {
+          ...product,
+          images: product.images.map(img => ({ ...img }))
+        }
+      }
+    });
+  }
 
-    if (isEditing && product) {
-      this.editingProductId = product.id;
-      this.productName = product.name;
-      this.productPrice = product.price.toString();
-      this.productDescription = product.description;
-      this.productPhone = product.phone;  // Charger le téléphone
-      this.productEmail = product.email;  // Charger l'email
-      this.previewImage = product.image;
-    } else {
-      this.resetForm();
+  onDelete(productId: string) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+      this.productService.deleteProduct(productId);
     }
   }
 
-  closeAlert() {
-    this.alertVisible = false;
-    this.resetForm();
-  }
+  // Fonction appelée lorsque l'utilisateur sélectionne un fichier
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
 
-  onImageUpload(event: any) {
-    const file = event.target.files[0];
-    if (file) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      // Créer un objet FileReader pour lire le fichier sélectionné
       const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.previewImage = e.target.result;
+      
+      // Une fois le fichier lu, on met à jour l'URL de l'image
+      reader.onload = () => {
+        this.imageUrl = reader.result as string;
       };
+
+      // Lire le fichier en tant que URL de données
       reader.readAsDataURL(file);
     }
   }
 
-  onSubmit() {
-    if (!this.productName || !this.productPrice) {
-      alert('Veuillez remplir tous les champs.');
-      return;
-    }
-
-    if (this.isEditing && this.editingProductId !== null) {
-      const updatedProduct = {
-        name: this.productName,
-        price: parseFloat(this.productPrice),
-        description: this.productDescription,
-        phone: this.productPhone,  // Inclure le téléphone dans la mise à jour
-        email: this.productEmail,  // Inclure l'email dans la mise à jour
-        image: this.previewImage
-      };
-      this.servicesService.updateProduct(this.editingProductId, updatedProduct);
-      alert('Produit modifié avec succès!');
-    } else {
-      const newProduct = {
-        id: 0, // L'ID est généré par le service
-        name: this.productName,
-        price: parseFloat(this.productPrice),
-        description: this.productDescription,
-        phone: this.productPhone,  // Inclure le téléphone dans l'ajout
-        email: this.productEmail,  // Inclure l'email dans l'ajout
-        image: this.previewImage
-      };
-      this.servicesService.addProduct(
-        this.productName,
-        parseFloat(this.productPrice),
-        this.productDescription,
-        this.previewImage,
-        this.productPhone,
-        this.productEmail
-      );
-      alert('Produit ajouté avec succès!');
-    }
-
-    this.products = this.servicesService.getProducts();  // Mettre à jour la liste des produits
-    this.closeAlert();
+  // Mettre à jour l'URL de l'image dans Firestore
+  updateUserProfile(photoUrl: string): void {
+    // Implémente la mise à jour de Firestore ici, par exemple :
+    // this.firestore.collection('users').doc(this.userId).set({ photoUrl }, { merge: true });
   }
 
-  deleteProduct(id: number) {
-    if (this.servicesService.deleteProduct(id)) {
-      this.products = this.servicesService.getProducts(); // Mettre à jour la liste des produits
-      alert('Produit supprimé avec succès!');
-    } else {
-      alert('Erreur : produit introuvable.');
-    }
+
+  constructor( private productService: ProductService,
+    private router: Router,public userService: UserService,
+    private authService: AuthService, ) {}
+
+
+  logout() {
+    this.authService.signOut();
+    this.router.navigate(['/home']);
+  }
+  cancelLogout() {
+    this.showLogoutModal = false; // Masquer le modal si l'utilisateur annule
   }
 
-  resetForm() {
-    this.productName = '';
-    this.productPrice = '';
-    this.productDescription = '';
-    this.productPhone = '';  // Réinitialiser le téléphone
-    this.productEmail = '';  // Réinitialiser l'email
-    this.previewImage = 'https://via.placeholder.com/150';
-    this.isEditing = false;
-    this.editingProductId = null;
+  redirectToLogin() {
+    this.router.navigate(['/login']); // Redirect to your login page
   }
-}
+  }

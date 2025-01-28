@@ -1,0 +1,33 @@
+<div class="product-details-container" *ngIf="product">
+    <button class="back-button" (click)="goBack()">
+      ← Retour
+    </button>
+  
+    <div class="product-gallery">
+      <div class="main-image">
+        <img [src]="product.images[selectedImageIndex].url" [alt]="product.name">
+      </div>
+      <div class="thumbnail-grid">
+        <div *ngFor="let image of product.images; let i = index" 
+             class="thumbnail" 
+             [class.active]="i === selectedImageIndex"
+             (click)="selectImage(i)">
+          <img [src]="image.url" [alt]="product.name + ' thumbnail ' + (i + 1)">
+        </div>
+      </div>
+    </div>
+    
+    <div class="product-info">
+      <h1>{{ product.name }}</h1>
+      <p class="price">{{ product.price }} €</p>
+      <div class="description">
+        <h2>Description</h2>
+        <p>{{ product.description }}</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading" *ngIf="!product">
+    Chargement du produit...
+  </div>
+  

@@ -1,51 +1,60 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ServicesService } from '../services.service';
-import { NgFor, NgIf } from '@angular/common';
+import { ProductService } from '../services/product.service';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FooterComponent } from '../footer/footer.component';
 import { ChatbotComponent } from '../chatbot/chatbot.component';
-
+import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { PublishProductComponent } from '../publish-product/publish-product.component';
+import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
-    RouterLink, 
+    CommonModule,
     FormsModule, 
-    NgFor, 
-    NgIf, 
+    NgIf,
+    NgFor,
     FooterComponent, 
-    ChatbotComponent
+    ChatbotComponent,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  products: any[] = [];
-  alertVisible = false;
-  selectedProduct: any = null;
-
+  products$;
   @ViewChild('chatbot') chatbot!: ChatbotComponent;
+  constructor(private productService: ProductService,private router: Router,
+   public userService: UserService,private dialog: MatDialog,private authService: AuthService) {
+    this.products$ = this.productService.getProducts();
+   }
+    ngOnInit() {}
 
-  constructor(private servicesService: ServicesService) {}
-
-  ngOnInit() {
-    this.products = this.servicesService.getProducts();
+  onProductClick(productId: string) {
+    this.router.navigate(['/productDetails'], { state: { id: productId } });
   }
-
-  openProductDetails(product: any) {
-    this.selectedProduct = product;
-    this.alertVisible = true;
-  }
-
-  closeAlert() {
-    this.alertVisible = false;
-    this.selectedProduct = null;
-  }
-
   toggleChatbot() {
     if (this.chatbot) {
       this.chatbot.toggle();
     }
   }
+  redirectToPublishProduct() {
+    this.router.navigate(['/publish-product']); 
+    
+  }
+   redirectToLogin() {
+    this.router.navigate(['/login']); 
+  }
+  onProfileIconClick(): void {
+    if (this.authService.isLoggedIn()) {
+      // Rediriger vers le profil de l'utilisateur
+      this.router.navigate(['/profil']);
+    } else {
+      // Rediriger vers la page de connexion
+      this.router.navigate(['/signin']);
+    }
+  }
+
 }

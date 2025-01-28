@@ -1,0 +1,74 @@
+<div class="form-container">
+  <h2>{{ isEditing ? 'Modifier le Produit' : 'Ajouter un Produit' }}</h2>
+  <form (ngSubmit)="onSubmit()" #productForm="ngForm">
+    <div class="form-group">
+      <label for="name">Nom du Produit</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        [(ngModel)]="product.name"
+        required
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        name="description"
+        [(ngModel)]="product.description"
+        required
+        class="form-control"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="price">Prix (€)</label>
+      <input
+        type="number"
+        id="price"
+        name="price"
+        [(ngModel)]="product.price"
+        required
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Photos du Produit (Maximum 6)</label>
+      <div class="image-grid">
+        <div class="image-upload-box" *ngFor="let image of product.images; let i = index">
+          <input
+            type="file"
+            [id]="'image-' + i"
+            (change)="onFileSelected($event, i)"
+            accept="image/*"
+            class="file-input"
+            [hidden]="true"
+          />
+          <label [for]="'image-' + i" class="image-label">
+            <div class="image-preview" *ngIf="image.url">
+              <img [src]="image.url" [alt]="'Image ' + (i + 1)" />
+              <button type="button" class="remove-image" (click)="removeImage(i)">×</button>
+            </div>
+            <div class="upload-placeholder" *ngIf="!image.url">
+              <span class="upload-icon">+</span>
+              <span class="upload-text">Photo {{ i + 1 }}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="!productForm.form.valid">
+        {{ isEditing ? 'Enregistrer les modifications' : 'Ajouter le produit' }}
+      </button>
+      <button type="button" (click)="onCancel()" class="btn-secondary">
+        Annuler
+      </button>
+    </div>
+  </form>
+</div>

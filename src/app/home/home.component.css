@@ -309,3 +309,7 @@
     padding: 1rem;
   }
 }
+.profile-icon a:hover {
+  transform: scale(1.2); /* Agrandir l'icône */
+  color: #4CAF50; /* Change la couleur de l'icône au survol (optionnel) */
+}
