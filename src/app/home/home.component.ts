@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ProductService } from '../services/product.service';
+import { ProductService, Product } from '../services/product.service';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FooterComponent } from '../footer/footer.component';
 import { ChatbotComponent } from '../chatbot/chatbot.component';
@@ -26,15 +26,20 @@ import { CardComponent } from './card/card.component';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  products$;
+  products: Product[] = [];
   @ViewChild('chatbot') chatbot!: ChatbotComponent;
   constructor(private productService: ProductService,private router: Router,
    public userService: UserService,private dialog: MatDialog,private authService: AuthService) {
-    this.products$ = this.productService.getProducts();
+    
    }
-    ngOnInit() {}
+    ngOnInit():void {
+      this.productService.getProducts().subscribe(products => {
+        this.products = products;
+      });
+    }
 
   onProductClick(productId: string) {
+    console.log('Product clicked:', productId);
     this.router.navigate(['/productDetails'], { state: { id: productId } });
   }
   toggleChatbot() {
@@ -43,6 +48,7 @@ export class HomeComponent implements OnInit {
     }
   }
   redirectToPublishProduct() {
+    
     this.router.navigate(['/publish-product']); 
     
   }

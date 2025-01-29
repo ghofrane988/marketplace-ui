@@ -117,8 +117,8 @@
       <div class="home-container">
         <h2>Produits disponibles</h2>
         <div class="products-grid">
-          <div class="product-card" *ngFor="let product of products$ | async" 
-               (click)="onProductClick(product.id)">
+          <div class="product-card" *ngFor="let product of products" class="product-card" 
+          (click)="onProductClick(product.id ? product.id : '')">
             <img *ngIf="product.images && product.images[0]?.url" 
                  [src]="product.images[0].url" 
                  [alt]="product.name" 

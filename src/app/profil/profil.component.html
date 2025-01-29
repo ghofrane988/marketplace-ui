@@ -76,7 +76,7 @@
 <!-- Posts Section -->
 <div class="profile-container">
   <h2>Mes Produits</h2>
-  <div *ngFor="let product of products" class="product-item">
+  <div *ngFor="let product of userProducts" class="product-card">
     <div class="product-card">
       <img *ngIf="product.images && product.images[0]?.url" 
            [src]="product.images[0].url" 
@@ -88,7 +88,7 @@
         <p class="price">{{ product.price }} €</p>
         <div class="button-group">
           <button class="edit-button" (click)="onEditProduct(product)">Modifier</button>
-          <button class="delete-button" (click)="onDelete(product.id)">Supprimer</button>
+          <button class="delete-button" (click)="onDelete(product.id ? product.id : '')">Supprimer</button>
         </div>
       </div>
     </div>

@@ -92,85 +92,39 @@ export class PublishProductComponent implements OnInit {
     price: 0,
     category: '',
     subcategory: '',
-    images: Array(6).fill({ url: '' })
+    images: Array(6).fill({ url: '' }),
+    userId: 'currentUserId'
   };
 
-  constructor(
-    private productService: ProductService,
-    private router: Router
-  ) {
-    const state = this.router.getCurrentNavigation()?.extras?.state;
-    
-    if (state && 'product' in state) {
-      this.product = { 
-        ...state['product'],
-        images: [...state['product'].images]
-      };
-      if (this.product.category) {
-        this.updateSubcategories(this.product.category);
-      }
-      while (this.product.images.length < 6) {
-        this.product.images.push({ url: '' });
-      }
-      this.isEditing = true;
-    }
-  }
+  constructor(private productService: ProductService, private router: Router) {}
 
   ngOnInit(): void {}
 
-  updateSubcategories(category: string): void {
-    this.subcategories = this.categoryStructure[category] || [];
-    if (!this.subcategories.includes(this.product.subcategory)) {
-      this.product.subcategory = '';
-    }
+  onCategoryChange(): void {
+    this.subcategories = this.categoryStructure[this.product.category] || [];
   }
 
-  onCategoryChange(): void {
-    this.updateSubcategories(this.product.category);
+  onSubmit(): void {
+    this.productService.addProduct(this.product).then(() => {
+      this.router.navigate(['/home']); // Redirect to home page after adding product
+    });
   }
 
   onFileSelected(event: any, index: number): void {
     const file = event.target.files[0];
     if (file) {
-      this.product.images[index] = {
-        file: file,
-        url: URL.createObjectURL(file)
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.product.images[index] = { file, url: e.target.result };
       };
+      reader.readAsDataURL(file);
     }
   }
 
   removeImage(index: number): void {
-    this.product.images[index] = { url: '' };
+    this.product.images.splice(index, 1);
   }
-
-  onSubmit(): void {
-    // Filtrer les images vides
-    this.product.images = this.product.images.filter(img => img.url !== '');
-    
-    if (this.isEditing) {
-      this.productService.editProduct(this.product);
-      this.router.navigate(['/profil']);
-    } else {
-      this.productService.addProduct(this.product);
-      this.router.navigate(['/profil']);
-    }
-  }
-
   onCancel(): void {
-    this.router.navigate(['/profil']);
-  }
-
-  resetForm(): void {
-    this.product = {
-      id: '',
-      name: '',
-      description: '',
-      price: 0,
-      category: '',
-      subcategory: '',
-      images: Array(6).fill({ url: '' })
-    };
-    this.subcategories = [];
-    this.isEditing = false;
+    this.router.navigate(['/home']); // Redirect to the home page or any other page
   }
 }

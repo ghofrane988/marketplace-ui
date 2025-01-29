@@ -20,10 +20,11 @@ export class ProfilComponent implements OnInit {
     const fileInput = document.querySelector('input[type="file"]') as HTMLElement;
     fileInput.click();
   }
-  products: Product[] = [];
-  ngOnInit() {
-    this.productService.getProducts().subscribe(products => {
-      this.products = products;
+  userProducts: Product[] = [];
+  ngOnInit(): void {
+    const userId = 'currentUserId'; // Replace with actual user ID
+    this.productService.getProductsByUser(userId).subscribe(products => {
+      this.userProducts = products;
     });
   }
 
@@ -36,10 +37,12 @@ export class ProfilComponent implements OnInit {
         }
       }
     });
+    
   }
 
   onDelete(productId: string) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+      console.log('Product deleted:', productId);
       this.productService.deleteProduct(productId);
     }
   }

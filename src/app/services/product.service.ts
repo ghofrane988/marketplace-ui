@@ -1,9 +1,10 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, Inject, PLATFORM_ID, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { collection, collectionData, Firestore, addDoc, doc, deleteDoc, updateDoc , query, where } from '@angular/fire/firestore';
+import { Storage, ref, uploadBytesResumable } from '@angular/fire/storage';
 
 export interface Product {
-  id: string;
+  id?: string; // Firestore génère automatiquement un ID, donc il est optionnel
   name: string;
   description: string;
   price: number;
@@ -13,143 +14,76 @@ export interface Product {
     file?: File;
     url: string;
   }[];
+  userId: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  private readonly localStorageKey = 'products';
-  private products = new BehaviorSubject<Product[]>([]);
-  private isBrowser: boolean;
+  private storage = inject(Storage);
 
-  constructor(@Inject(PLATFORM_ID) platformId: Object) {
-    this.isBrowser = isPlatformBrowser(platformId);
-    if (this.isBrowser) {
-      this.products = new BehaviorSubject<Product[]>(this.loadProductsFromLocalStorage());
-    }
+  constructor(private firestore: Firestore) {}
+
+  // Récupérer tous les produits
+  getProducts(): Observable<Product[]> {
+    const ref = collection(this.firestore, 'products');
+    return collectionData(ref, { idField: 'id' }) as Observable<Product[]>;
+  }
+  // Get products by user ID
+  getProductsByUser(userId: string): Observable<Product[]> {
+    const ref = collection(this.firestore, 'products');
+    const q = query(ref, where('userId', '==', userId));
+    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
   }
 
-  getProducts() {
-    return this.products;
-  }
-
-  private isLocalStorageAvailable(): boolean {
-    if (!this.isBrowser) return false;
-    
-    try {
-      const test = 'test';
-      localStorage.setItem(test, test);
-      localStorage.removeItem(test);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  private loadProductsFromLocalStorage(): Product[] {
-    if (!this.isLocalStorageAvailable()) return [];
-    
-    const productsJson = localStorage.getItem(this.localStorageKey);
-    return productsJson ? JSON.parse(productsJson) : [];
-  }
-
-  private saveProductsToLocalStorage(products: Product[]) {
-    if (!this.isLocalStorageAvailable()) return;
-    
-    try {
-      localStorage.setItem(this.localStorageKey, JSON.stringify(products));
-    } catch (e) {
-      console.error('Erreur lors de la sauvegarde dans localStorage:', e);
-    }
-  }
-
-  addProduct(product: Product) {
-    const currentProducts = this.products.value;
-    const newProduct: Product = { 
-      ...product, 
-      id: this.generateUniqueId() 
-    };
-
-    if (newProduct.images) {
-      newProduct.images = newProduct.images.filter(img => img.url !== '');
-      const pendingImages = newProduct.images.filter(img => img.file).length;
-      let processedImages = 0;
-
-      if (pendingImages === 0) {
-        const updatedProducts = [...currentProducts, newProduct];
-        this.updateProducts(updatedProducts);
-        return;
+  // Ajouter un produit
+  async addProduct(product: Product) {
+    for (let i = 0; i < product.images.length; i++) {
+      const file = product.images[i].file;
+      if (file) {
+          // const storageRef = ref(this.storage, file.name);
+          // const imageRef = await uploadBytesResumable(storageRef, file);
+          product.images[i] = {
+            // url: imageRef.ref.fullPath
+            url: "",
+          }
       }
+  }
 
-      newProduct.images.forEach((image, index) => {
-        if (image.file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            newProduct.images[index].url = e.target?.result as string;
-            delete newProduct.images[index].file;
-            processedImages++;
-
-            if (processedImages === pendingImages) {
-              const updatedProducts = [...currentProducts, newProduct];
-              this.updateProducts(updatedProducts);
-            }
-          };
-          reader.readAsDataURL(image.file);
-        }
-      });
-    } else {
-      const updatedProducts = [...currentProducts, newProduct];
-      this.updateProducts(updatedProducts);
+    const firestoreRef = collection(this.firestore, 'products');
+    console.log(product)
+    try {
+      const docRef = await addDoc(firestoreRef, {...product});
+      console.log('Product added with ID: ', docRef);
+    } catch (e) {
+      console.error('Error adding product: ', e);
     }
   }
 
-  deleteProduct(productId: string) {
-    const updatedProducts = this.products.value.filter(product => product.id !== productId);
-    this.updateProducts(updatedProducts);
+  // Supprimer un produit
+  async deleteProduct(productId: string) {
+    const ref = doc(this.firestore, `products/${productId}`);
+    try {
+      await deleteDoc(ref);
+      console.log('Product deleted with ID: ', productId);
+    } catch (e) {
+      console.error('Error deleting product: ', e);
+    }
   }
 
-  editProduct(updatedProduct: Product) {
-    const currentProducts = this.products.value;
-    const index = currentProducts.findIndex(p => p.id === updatedProduct.id);
-    
-    if (index === -1) return;
-
-    const pendingImages = updatedProduct.images.filter(img => img.file).length;
-    let processedImages = 0;
-
-    if (pendingImages === 0) {
-      const newProducts = [...currentProducts];
-      newProducts[index] = updatedProduct;
-      this.updateProducts(newProducts);
+  // Mettre à jour un produit
+  async editProduct(updatedProduct: Product) {
+    if (!updatedProduct.id) {
+      console.error('Product ID is required for update');
       return;
     }
-
-    updatedProduct.images.forEach((image, imgIndex) => {
-      if (image.file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          updatedProduct.images[imgIndex].url = e.target?.result as string;
-          delete updatedProduct.images[imgIndex].file;
-          processedImages++;
-
-          if (processedImages === pendingImages) {
-            const newProducts = [...currentProducts];
-            newProducts[index] = updatedProduct;
-            this.updateProducts(newProducts);
-          }
-        };
-        reader.readAsDataURL(image.file);
-      }
-    });
-  }
-
-  private updateProducts(products: Product[]) {
-    this.products.next(products);
-    this.saveProductsToLocalStorage(products);
-  }
-
-  private generateUniqueId(): string {
-    return Math.random().toString(36).substring(2, 9);
+    const ref = doc(this.firestore, `products/${updatedProduct.id}`);
+    try {
+      await updateDoc(ref, { ...updatedProduct });
+      console.log('Product updated with ID: ', updatedProduct.id);
+    } catch (e) {
+      console.error('Error updating product: ', e);
+    }
   }
 }

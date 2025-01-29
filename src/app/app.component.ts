@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import {Component  } from '@angular/core';
+import {Component, inject  } from '@angular/core';
+import { Firestore } from '@angular/fire/firestore';
 import { RouterModule, RouterOutlet } from '@angular/router';
 
 
@@ -13,6 +14,7 @@ import { RouterModule, RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'marketPlace';
+  firestore: Firestore = inject(Firestore);
   
   
 }
