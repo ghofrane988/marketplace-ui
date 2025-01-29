@@ -1,25 +1,99 @@
-import { Component,OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ProductService, Product } from '../services/product.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+
+type CategoryStructure = {
+  [key: string]: string[];
+};
+
 @Component({
   selector: 'app-publish-product',
-  templateUrl: './publish-product.component.html',
-  imports:[CommonModule,  FormsModule,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
   ],
-  styleUrls: ['./publish-product.component.css'],
+  templateUrl: './publish-product.component.html',
+  styleUrls: ['./publish-product.component.css']
 })
 export class PublishProductComponent implements OnInit {
+  categoryStructure: CategoryStructure = {
+    'Électronique': [
+      'Smartphones et accessoires',
+      'Ordinateurs et périphériques',
+      'Téléviseurs et équipements audio',
+      'Consoles et jeux vidéo',
+      'Électroménagers'
+    ],
+    'Vêtements': [
+      'Vêtements homme',
+      'Vêtements femme',
+      'Vêtements enfant',
+      'Chaussures',
+      'Accessoires de mode'
+    ],
+    'Maison et Jardin': [
+      'Meubles',
+      'Décoration',
+      'Jardinage',
+      'Bricolage',
+      'Articles ménagers'
+    ],
+    'Sports et Loisirs': [
+      'Équipement sportif',
+      'Vêtements de sport',
+      'Camping et randonnée',
+      'Vélos',
+      'Fitness et musculation'
+    ],
+    'Livres': [
+      'Romans',
+      'BD et Mangas',
+      'Livres scolaires',
+      'Magazines',
+      'Livres pour enfants'
+    ],
+    'Jeux et Jouets': [
+      'Jeux de société',
+      'Jouets pour enfants',
+      'Jeux éducatifs',
+      'Peluches',
+      'Jeux de construction'
+    ],
+    'Auto et Moto': [
+      'Pièces auto',
+      'Accessoires auto',
+      'Équipement moto',
+      'GPS et électronique',
+      'Entretien véhicule'
+    ],
+    'Beauté et Bien-être': [
+      'Soins du visage',
+      'Soins du corps',
+      'Parfums',
+      'Maquillage',
+      'Matériel de soin'
+    ],
+    'Autres': [
+      'Divers'
+    ]
+  };
+
+  categories = Object.keys(this.categoryStructure);
+  subcategories: string[] = [];
+  isEditing = false;
+
   product: Product = {
     id: '',
     name: '',
     description: '',
     price: 0,
+    category: '',
+    subcategory: '',
     images: Array(6).fill({ url: '' })
   };
-  
-  isEditing = false;
 
   constructor(
     private productService: ProductService,
@@ -32,6 +106,9 @@ export class PublishProductComponent implements OnInit {
         ...state['product'],
         images: [...state['product'].images]
       };
+      if (this.product.category) {
+        this.updateSubcategories(this.product.category);
+      }
       while (this.product.images.length < 6) {
         this.product.images.push({ url: '' });
       }
@@ -39,9 +116,20 @@ export class PublishProductComponent implements OnInit {
     }
   }
 
-  ngOnInit() {}
+  ngOnInit(): void {}
 
-  onFileSelected(event: any, index: number) {
+  updateSubcategories(category: string): void {
+    this.subcategories = this.categoryStructure[category] || [];
+    if (!this.subcategories.includes(this.product.subcategory)) {
+      this.product.subcategory = '';
+    }
+  }
+
+  onCategoryChange(): void {
+    this.updateSubcategories(this.product.category);
+  }
+
+  onFileSelected(event: any, index: number): void {
     const file = event.target.files[0];
     if (file) {
       this.product.images[index] = {
@@ -51,11 +139,11 @@ export class PublishProductComponent implements OnInit {
     }
   }
 
-  removeImage(index: number) {
+  removeImage(index: number): void {
     this.product.images[index] = { url: '' };
   }
 
-  onSubmit() {
+  onSubmit(): void {
     // Filtrer les images vides
     this.product.images = this.product.images.filter(img => img.url !== '');
     
@@ -68,18 +156,21 @@ export class PublishProductComponent implements OnInit {
     }
   }
 
-  onCancel() {
+  onCancel(): void {
     this.router.navigate(['/profil']);
   }
 
-  resetForm() {
+  resetForm(): void {
     this.product = {
       id: '',
       name: '',
       description: '',
       price: 0,
+      category: '',
+      subcategory: '',
       images: Array(6).fill({ url: '' })
     };
+    this.subcategories = [];
     this.isEditing = false;
   }
 }

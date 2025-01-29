@@ -1,5 +1,5 @@
 <!-- Section de recherche -->
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg bg-white">
   <div class="container d-flex justify-content-between align-items-center">
     <!-- Logo -->
     <a routerLink="/home" class="navbar-brand d-flex align-items-center">
@@ -128,6 +128,7 @@
               <p class="description">{{ product.description }}</p>
               <p class="price">{{ product.price }} €</p>
             </div>
+            <app-card [imgUrl]="product.images[0].url" />
           </div>
         </div>
       </div>

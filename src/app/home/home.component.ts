@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { PublishProductComponent } from '../publish-product/publish-product.component';
 import { AuthService } from '../services/auth.service';
+import { CardComponent } from './card/card.component';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -19,6 +20,7 @@ import { AuthService } from '../services/auth.service';
     NgFor,
     FooterComponent, 
     ChatbotComponent,
+    CardComponent,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
