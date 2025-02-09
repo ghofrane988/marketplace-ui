@@ -3,14 +3,14 @@ import { ProductService, Product } from '../services/product.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
+import { AuthService } from '../services/auth.service';
 type CategoryStructure = {
   [key: string]: string[];
 };
 
 @Component({
   selector: 'app-publish-product',
-  standalone: true,
+
   imports: [
     CommonModule,
     FormsModule,
@@ -93,22 +93,30 @@ export class PublishProductComponent implements OnInit {
     category: '',
     subcategory: '',
     images: Array(6).fill({ url: '' }),
-    userId: 'currentUserId'
+    userId: '',
   };
 
-  constructor(private productService: ProductService, private router: Router) {}
+  constructor(private productService: ProductService, private router: Router,private authService:AuthService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    
+  }
 
   onCategoryChange(): void {
     this.subcategories = this.categoryStructure[this.product.category] || [];
   }
 
   onSubmit(): void {
+  const userId = this.authService.currentUserSubjectValue?.uid;
+  if (userId) {
+    this.product.userId = userId;
     this.productService.addProduct(this.product).then(() => {
-      this.router.navigate(['/home']); // Redirect to home page after adding product
+      this.router.navigate(['/home']);
     });
+  } else {
+    console.error('User is not logged in.');
   }
+}
 
   onFileSelected(event: any, index: number): void {
     const file = event.target.files[0];

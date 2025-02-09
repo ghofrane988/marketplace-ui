@@ -4,3 +4,24 @@
 @tailwind utilities;
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.dark-mode a {
+    color: #bb86fc;
+}
+
+.dark-mode .card {
+    background-color: #1e1e1e;
+}
+.dark-mode .navbar {
+    background-color: #1e1e1e; /* Fond de la navbar */
+}
+
+/* Autres éléments */
+.dark-mode .product {
+    background-color: #1e1e1e; /* Fond des produits */
+}

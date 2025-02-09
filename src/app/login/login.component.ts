@@ -27,14 +27,16 @@ export class LoginComponent {
   async onLogin() {
     this.loading = true;
     this.errorMessage = '';
-    
+  
     try {
       await this.authService.signIn(this.loginData.email, this.loginData.password);
-      this.router.navigate(['/profil']);
+      this.router.navigate(['/profil']); // Redirect to profile page after login
     } catch (error: any) {
       this.errorMessage = error.message || 'An error occurred during login';
     } finally {
       this.loading = false;
     }
   }
+  
+  
 }

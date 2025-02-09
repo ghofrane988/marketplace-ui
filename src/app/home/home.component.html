@@ -1,6 +1,22 @@
 <!-- Section de recherche -->
 <nav class="navbar navbar-expand-lg bg-white">
   <div class="container d-flex justify-content-between align-items-center">
+    <!-- Menu Icon (Left Side) -->
+    <div class="d-flex align-items-center">
+      <button class="btn btn-menu" (click)="toggleMenu()">
+        <i class="bi bi-list fs-4"></i> <!-- Menu Icon -->
+      </button>
+      <!-- Menu Dropdown -->
+      <div class="menu-dropdown" *ngIf="isMenuOpen">
+        <button class="dropdown-item" (click)="toggleDarkMode()">
+          <i class="bi bi-moon me-2"></i> Dark Mode
+        </button>
+        <button class="dropdown-item" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-2"></i> Log Out
+        </button>
+      </div>
+    </div>
+
     <!-- Logo -->
     <a routerLink="/home" class="navbar-brand d-flex align-items-center">
       <span class="logo-text"><span class="text-success">Ghofy</span></span>
@@ -10,14 +26,16 @@
     <div class="d-flex align-items-center gap-3">
       <div *ngIf="userService.isLoggedIn; else notLoggedIn">
         <!-- Show Publish Product button if user is logged in -->
-        <button (click)="redirectToPublishProduct()"> 
-          <i class="bi bi-plus-circle me-2"></i>Publish Product</button>
+        <button routerLink="/publish-product"> 
+          <i class="bi bi-plus-circle me-2"></i>Publish Product
+        </button>
       </div>
       <ng-template #notLoggedIn>
         <!-- Show a message or redirect to login/verification page if not logged in -->
         <button (click)="redirectToLogin()">Log in to Publish Product</button>
       </ng-template>
     </div>
+
     <!-- Right Side Items -->
     <div class="d-flex align-items-center gap-3">
       <!-- Search Bar -->
@@ -51,7 +69,6 @@
 
 <!-- Chatbot Component -->
 <app-chatbot #chatbot></app-chatbot>
-
 <!-- Image Slider -->
 <div class="slider-container">
   <div id="imageSlider" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
@@ -115,7 +132,6 @@
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <h2 class="text-2xl font-bold tracking-tight text-gray-900">Products</h2>
       <div class="home-container">
-        <h2>Produits disponibles</h2>
         <div class="products-grid">
           <div class="product-card" *ngFor="let product of products" class="product-card" 
           (click)="onProductClick(product.id ? product.id : '')">

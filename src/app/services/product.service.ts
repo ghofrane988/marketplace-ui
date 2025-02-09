@@ -1,10 +1,13 @@
-import { Injectable, Inject, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { collection, collectionData, Firestore, addDoc, doc, deleteDoc, updateDoc , query, where } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable } from '@angular/fire/storage';
+import { collection, collectionData, Firestore, addDoc, getDoc, doc, deleteDoc, query, where } from '@angular/fire/firestore';
+import { Storage } from '@angular/fire/storage';
+import { UserService } from './user.service';
+import { AuthService } from './auth.service';
+import { User } from '@angular/fire/auth';
 
 export interface Product {
-  id?: string; // Firestore génère automatiquement un ID, donc il est optionnel
+  id?: string;
   name: string;
   description: string;
   price: number;
@@ -15,6 +18,9 @@ export interface Product {
     url: string;
   }[];
   userId: string;
+  sellerName?: string;
+  sellerPhone?: string;
+  sellerAddress?: string;
 }
 
 @Injectable({
@@ -23,45 +29,67 @@ export interface Product {
 export class ProductService {
   private storage = inject(Storage);
 
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore, private authService: AuthService, private userService: UserService) {}
 
-  // Récupérer tous les produits
   getProducts(): Observable<Product[]> {
     const ref = collection(this.firestore, 'products');
     return collectionData(ref, { idField: 'id' }) as Observable<Product[]>;
   }
-  // Get products by user ID
+
   getProductsByUser(userId: string): Observable<Product[]> {
     const ref = collection(this.firestore, 'products');
     const q = query(ref, where('userId', '==', userId));
     return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
   }
 
-  // Ajouter un produit
-  async addProduct(product: Product) {
+  private async fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  }
+
+  async addProduct(product: Omit<Product, 'userId' | 'sellerName' | 'sellerPhone' | 'sellerAddress'>) {
+    const user$: Observable<User | null> = this.authService.currentUser;
+    const user = await new Promise<User | null>((resolve) => user$.subscribe(resolve));
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+
+    const userData = await this.userService.getUserProfile(user.uid);
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
+    const productData: Product = {
+      ...product,
+      userId: user.uid,
+      sellerName: `${userData.firstName} ${userData.lastName}`,
+      sellerPhone: userData.phoneNumber,
+      sellerAddress: userData.address,
+    };
+
     for (let i = 0; i < product.images.length; i++) {
       const file = product.images[i].file;
       if (file) {
-          // const storageRef = ref(this.storage, file.name);
-          // const imageRef = await uploadBytesResumable(storageRef, file);
-          product.images[i] = {
-            // url: imageRef.ref.fullPath
-            url: "",
-          }
+        const base64 = await this.fileToBase64(file);
+        const imageKey = `product_image_${Date.now()}_${i}`;
+        localStorage.setItem(imageKey, base64);
+        product.images[i] = { url: imageKey };
       }
-  }
+    }
 
     const firestoreRef = collection(this.firestore, 'products');
-    console.log(product)
     try {
-      const docRef = await addDoc(firestoreRef, {...product});
-      console.log('Product added with ID: ', docRef);
+      const docRef = await addDoc(firestoreRef, { ...productData });
+      console.log('Product added with ID: ', docRef.id);
     } catch (e) {
       console.error('Error adding product: ', e);
     }
   }
 
-  // Supprimer un produit
   async deleteProduct(productId: string) {
     const ref = doc(this.firestore, `products/${productId}`);
     try {
@@ -72,18 +100,22 @@ export class ProductService {
     }
   }
 
-  // Mettre à jour un produit
-  async editProduct(updatedProduct: Product) {
-    if (!updatedProduct.id) {
-      console.error('Product ID is required for update');
-      return;
-    }
-    const ref = doc(this.firestore, `products/${updatedProduct.id}`);
-    try {
-      await updateDoc(ref, { ...updatedProduct });
-      console.log('Product updated with ID: ', updatedProduct.id);
-    } catch (e) {
-      console.error('Error updating product: ', e);
+  async getProductById(productId: string): Promise<Product | undefined> {
+    const ref = doc(this.firestore, `products/${productId}`);
+    const snapshot = await getDoc(ref);
+    if (snapshot.exists()) {
+      const product = { id: snapshot.id, ...snapshot.data() } as Product;
+      product.images = product.images.map(image => {
+        if (image.url.startsWith('product_image_')) {
+          const base64 = localStorage.getItem(image.url);
+          return { url: base64 || '' };
+        }
+        return image;
+      });
+      return product;
+    } else {
+      console.error('Product not found');
+      return undefined;
     }
   }
 }

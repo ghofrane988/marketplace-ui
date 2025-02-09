@@ -3,13 +3,12 @@ import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { ProfilComponent } from './profil/profil.component';
 import { SignupComponent } from './signup/signup.component';
-
 import { FooterComponent } from './footer/footer.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
 import { authGuard } from './guards/auth.guard';
 import { PublishProductComponent } from './publish-product/publish-product.component';
 import { ProductDetailsComponent } from './product-details/product-details.component';
-
+import { MessagingComponent } from './messaging/messaging.component';
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, 
   { path: 'login', component: LoginComponent },
@@ -27,5 +26,6 @@ export const routes: Routes = [
   { path: 'footer', component: FooterComponent },
   { path: 'chatbot', component: ChatbotComponent } ,
   { path:'publish-product', component: PublishProductComponent},
-  {path:'productDetails',component:ProductDetailsComponent}
+  {path:'productDetails',component:ProductDetailsComponent},
+  {path:'messaging',component:MessagingComponent}
 ];

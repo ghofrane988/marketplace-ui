@@ -1,33 +1,48 @@
 <div class="product-details-container" *ngIf="product">
-    <button class="back-button" (click)="goBack()">
-      ← Retour
-    </button>
-  
-    <div class="product-gallery">
-      <div class="main-image">
-        <img [src]="product.images[selectedImageIndex].url" [alt]="product.name">
-      </div>
-      <div class="thumbnail-grid">
-        <div *ngFor="let image of product.images; let i = index" 
-             class="thumbnail" 
-             [class.active]="i === selectedImageIndex"
-             (click)="selectImage(i)">
-          <img [src]="image.url" [alt]="product.name + ' thumbnail ' + (i + 1)">
-        </div>
-      </div>
+  <button class="back-button" (click)="goBack()">
+    ← Retour
+  </button>
+
+  <div class="product-gallery">
+    <div class="main-image">
+      <img [src]="product.images[selectedImageIndex].url" [alt]="product.name">
     </div>
-    
-    <div class="product-info">
-      <h1>{{ product.name }}</h1>
-      <p class="price">{{ product.price }} €</p>
-      <div class="description">
-        <h2>Description</h2>
-        <p>{{ product.description }}</p>
+    <div class="thumbnail-grid">
+      <div *ngFor="let image of product.images">
+        <img *ngIf="image.url" [src]="image.url" alt="Product Image" />
+        <p *ngIf="!image.url">Loading image...</p>
       </div>
     </div>
   </div>
-  
-  <div class="loading" *ngIf="!product">
-    Chargement du produit...
+
+  <div class="product-info">
+    <h1>{{ product.name }}</h1>
+    <p class="price">{{ product.price }} €</p>
+    <div class="description">
+      <h2>Description</h2>
+      <p>{{ product.description }}</p>
+    </div>
+
+    <!-- Informations du vendeur -->
+    <div class="seller-info">
+      <h2>Informations du vendeur</h2>
+      <div class="seller-profile">
+      
+        <p><strong>Nom:</strong> {{ product.sellerName }} </p>
+        <p><strong>Téléphone:</strong> {{ product.sellerAddress }}</p>
+        <p><strong>Adresse:</strong> {{ product.sellerPhone}}</p>
+        <!-- Bouton Contacter -->
+        <div *ngIf="userService.isLoggedIn; else notLoggedIn">
+        <button class="contact-button" (click)="contactSeller()">
+          <i class="bi bi-envelope me-2"></i> Contacter le vendeur
+        </button>
+      </div>
+      <ng-template #notLoggedIn>
+        <!-- Show a message or redirect to login/verification page if not logged in -->
+        <button (click)="redirectToLogin()">Log in to Contact Seller</button>
+      </ng-template>
+      </div>
+    </div>
   </div>
-  
+</div>
+

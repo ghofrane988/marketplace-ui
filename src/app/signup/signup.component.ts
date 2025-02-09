@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -9,22 +9,27 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css'],
-  host: {
-    '[class.boxicons-css]': 'true'
-  },
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./signup.component.css']
 })
 export class SignupComponent {
+  errorMessage: string = '';
+  loading: boolean = false;
   signupData = {
     firstName: '',
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phoneNumber: '',
+    address: ''
   };
-  errorMessage: string = '';
-  loading: boolean = false;
+
+  // Example list of addresses (replace with your actual data)
+  addresses: string[] = [
+    'Address 1',
+    'Address 2',
+    'Address 3'
+  ];
 
   constructor(
     private authService: AuthService,
@@ -45,7 +50,9 @@ export class SignupComponent {
         this.signupData.email,
         this.signupData.password,
         this.signupData.firstName,
-        this.signupData.lastName
+        this.signupData.lastName,
+        this.signupData.phoneNumber,
+        this.signupData.address
       );
       this.router.navigate(['/profile']);
     } catch (error: any) {
@@ -74,6 +81,14 @@ export class SignupComponent {
     }
     if (this.signupData.password.length < 6) {
       this.errorMessage = 'Password must be at least 6 characters long';
+      return false;
+    }
+    if (!this.signupData.phoneNumber.trim()) {
+      this.errorMessage = 'Phone number is required';
+      return false;
+    }
+    if (!this.signupData.address.trim()) {
+      this.errorMessage = 'Address is required';
       return false;
     }
     return true;

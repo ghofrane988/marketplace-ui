@@ -1,0 +1,13 @@
+<div *ngIf="conversation">
+  <h2>Conversation</h2>
+  <div *ngFor="let message of conversation.messages">
+    <p>
+      <strong>
+        {{ (authService.currentUser | async)?.uid === message.senderId ? 'Vous' : 'Vendeur' }}:
+      </strong>
+      {{ message.text }}
+    </p>
+  </div>
+  <textarea [(ngModel)]="newMessage" placeholder="Écrivez un message..."></textarea>
+  <button (click)="sendMessage()">Envoyer</button>
+</div>

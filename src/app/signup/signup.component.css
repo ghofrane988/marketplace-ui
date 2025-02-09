@@ -20,7 +20,7 @@ body{
 .container{
     position: relative;
     width: 850px;
-    height: 550px;
+    height: 650px;
     background: #fff;
     margin: 20px;
     border-radius: 30px;
@@ -262,4 +262,25 @@ form{ width: 100%; }
 .btn-exit {
   margin-top: 20px; /* Optionnel : ajustez pour espacer davantage */
 }
+/* */
+.google-btn {
+    background-color: #4285F4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .google-btn:hover {
+    background-color: #357ABD;
+  }
+  
+  .google-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
 

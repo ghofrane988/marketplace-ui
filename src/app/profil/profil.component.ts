@@ -15,31 +15,41 @@ import { AuthService } from '../services/auth.service';
 })
 export class ProfilComponent implements OnInit {
   showLogoutModal = false;
-  imageUrl: string | null = null; // URL de l'image de profil
+  imageUrl: string | null = null;
+  firstName: string = '';
+  lastName: string = '';
+  phoneNumber: string ='';
+  address: string = '';
+  userProducts: Product[] = [];
   triggerFileUpload(): void {
     const fileInput = document.querySelector('input[type="file"]') as HTMLElement;
     fileInput.click();
   }
-  userProducts: Product[] = [];
   ngOnInit(): void {
-    const userId = 'currentUserId'; // Replace with actual user ID
-    this.productService.getProductsByUser(userId).subscribe(products => {
-      this.userProducts = products;
-    });
-  }
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        const userId = user.uid;
 
-  onEditProduct(product: Product) {
-    this.router.navigate(['/publish-product'], { 
-      state: { 
-        product: {
-          ...product,
-          images: product.images.map(img => ({ ...img }))
-        }
+        // Fetch user profile data
+        this.userService.getUserProfile(userId).then((profile) => {
+          if (profile) {
+            this.imageUrl = profile.photoURL || 'https://via.placeholder.com/150';
+            this.firstName = profile.firstName || ''; // Set first name
+            this.lastName = profile.lastName || ''; // Set last name
+            this.phoneNumber = profile.phoneNumber || '';
+            this.address = profile.address || '';
+          }
+        });
+
+        // Fetch user products
+        this.productService.getProductsByUser(userId).subscribe((products) => {
+          this.userProducts = products;
+        });
+      } else {
+        console.log('User is not logged in.');
       }
     });
-    
   }
-
   onDelete(productId: string) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
       console.log('Product deleted:', productId);

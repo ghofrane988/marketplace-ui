@@ -6,8 +6,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup, User, sendEmailVerification
 } from '@angular/fire/auth';
 import { 
   Firestore, 
@@ -22,22 +23,22 @@ export interface UserData {
   email: string;
   firstName: string;
   lastName: string;
+  phoneNumber: string;
+  address: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
-  
+export class AuthService { 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
   public get currentUser() {
     return this.currentUserSubject.asObservable();
   }
   public get currentUserSubjectValue() {
     return this.currentUserSubject.value;
   }
-  currentUser$ = this.currentUserSubject.asObservable();
-
   constructor(
     private auth: Auth,
     private firestore: Firestore
@@ -48,25 +49,35 @@ export class AuthService {
     });
   }
 
-  async signUp(email: string, password: string, firstName: string, lastName: string) {
+  async signUp(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    phoneNumber: string,
+    address: string
+  ) {
     try {
       // Create authentication user
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       const user = userCredential.user;
-
+  
       // Update profile with display name
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`
       });
-
+      await sendEmailVerification(user);
+  
       // Store additional user data in Firestore
       await this.createUserData({
         uid: user.uid,
         email: email,
         firstName: firstName,
-        lastName: lastName
+        lastName: lastName,
+        phoneNumber: phoneNumber,
+        address: address,
       });
-
+  
       return userCredential;
     } catch (error: any) {
       throw this.handleError(error);
@@ -110,9 +121,10 @@ export class AuthService {
 
   isLoggedIn(): Observable<User | null> {
     return this.currentUser$;
-  }
-
-  private handleError(error: any): string {
+    
+  }  
+  // Handle errors
+  public handleError(error: any): string {
     let errorMessage = 'An error occurred';
     if (error.code) {
       switch (error.code) {
@@ -140,4 +152,24 @@ export class AuthService {
     }
     return errorMessage;
   }
+  async signInWithGoogle() {
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(this.auth, provider);
+      const user = userCredential.user;
+      await this.createUserData({
+        uid: user.uid,
+        email: user.email!,
+        firstName: user.displayName?.split(' ')[0] || '',
+        lastName: user.displayName?.split(' ')[1] || '',
+        phoneNumber: user.phoneNumber || '',
+        address: ''
+      });
+      return userCredential;
+    } catch (error: any) {
+      throw new Error(this.handleError(error));
+    }
+  }
+ 
 }
+

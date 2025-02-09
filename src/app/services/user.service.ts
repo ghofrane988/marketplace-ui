@@ -7,12 +7,11 @@ import { map, switchMap } from 'rxjs/operators';
 export interface UserProfile {
   uid: string;
   email: string;
-  displayName?: string;
+  firstName?: string;
+  lastName?: string;
+  photoURL?: string;
   phoneNumber?: string;
   address?: string;
-  photoURL?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 @Injectable({
@@ -31,25 +30,29 @@ export class UserService {
       this.currentUser.next(user);
     });
   }
+
   get isLoggedIn(): boolean {
     return this.currentUser.value !== null;
   }
 
   // Sign up new user
-  async signUp(email: string, password: string, profileData: Partial<UserProfile>): Promise<void> {
+  async signUp(
+    email: string,
+    password: string,
+    profileData: Partial<UserProfile>
+  ): Promise<void> {
     try {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       const user = userCredential.user;
-      
+
       // Create user profile in Firestore
       await this.createUserProfile(user.uid, {
         uid: user.uid,
         email: user.email!,
         ...profileData,
-        createdAt: new Date(),
-        updatedAt: new Date()
       });
     } catch (error) {
+      console.error('Error during sign up:', error);
       throw error;
     }
   }
@@ -59,6 +62,7 @@ export class UserService {
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
+      console.error('Error during sign in:', error);
       throw error;
     }
   }
@@ -68,6 +72,7 @@ export class UserService {
     try {
       await signOut(this.auth);
     } catch (error) {
+      console.error('Error during sign out:', error);
       throw error;
     }
   }
@@ -76,13 +81,6 @@ export class UserService {
   private async createUserProfile(uid: string, profile: UserProfile): Promise<void> {
     const userRef = doc(this.firestore, `users/${uid}`);
     await setDoc(userRef, profile);
-  }
-
-  // Get user profile
-  async getUserProfile(uid: string): Promise<UserProfile | null> {
-    const userRef = doc(this.firestore, `users/${uid}`);
-    const userDoc = await getDoc(userRef);
-    return userDoc.exists() ? userDoc.data() as UserProfile : null;
   }
 
   // Update user profile
@@ -102,5 +100,12 @@ export class UserService {
         return from(this.getUserProfile(user.uid));
       })
     );
+  }
+
+  // Get user profile by UID
+  async getUserProfile(uid: string): Promise<UserProfile | null> {
+    const userRef = doc(this.firestore, `users/${uid}`);
+    const userDoc = await getDoc(userRef);
+    return userDoc.exists() ? userDoc.data() as UserProfile : null;
   }
 }
