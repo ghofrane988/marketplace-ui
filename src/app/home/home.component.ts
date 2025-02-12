@@ -150,7 +150,7 @@ export class HomeComponent implements OnInit {
 
   onProductClick(productId: string) {
     console.log('Product clicked:', productId);
-    this.router.navigate(['/productDetails'], { state: { id: productId } });
+    this.router.navigate(['/productDetails'], { queryParams: { id: productId } ,state: { id: productId } });
   }
   toggleChatbot() {
     if (this.chatbot) {

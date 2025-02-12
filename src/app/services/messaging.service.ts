@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, doc, getDoc, updateDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, updateDoc, query, where, getDocs } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 
@@ -44,10 +44,26 @@ export class ConversationService {
     return docRef.id;
   }
 
+  async getConversationsByUserIDAndProductID(userId: string, productId: string): Promise<Conversation | null> {
+    const buyerId = this.auth.currentUser?.uid;
+    if (!buyerId) throw new Error('User not logged in');
+    const conversationRef = collection(this.firestore, 'conversations');
+    const q = query(conversationRef, where('buyerId', '==', userId), where('productId', '==', productId));
+    const conversationSnapshot = await getDocs(q);
+
+    if (conversationSnapshot.empty) {
+      return null;
+    } else {
+      return conversationSnapshot.docs[0].data() as Conversation;
+    }
+  }
+
   // Send a new message
   async sendMessage(conversationId: string, text: string): Promise<void> {
+    if ( !conversationId ) throw new Error('No conversation ID provided');
     const senderId = this.auth.currentUser?.uid;
     if (!senderId) throw new Error('User not logged in');
+
 
     const message: Message = {
       senderId,
@@ -55,8 +71,10 @@ export class ConversationService {
       timestamp: new Date(),
     };
 
-    const conversationRef = doc(this.firestore, `conversations/${conversationId}`);
+    const conversationRef = doc(this.firestore, `conversations`, conversationId);
+    console.log(conversationRef);
     const conversationDoc = await getDoc(conversationRef);
+    console.log(conversationDoc.exists());
     if (conversationDoc.exists()) {
       const conversation = conversationDoc.data() as Conversation;
       await updateDoc(conversationRef, {

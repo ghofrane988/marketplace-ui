@@ -11,10 +11,13 @@ import { CommonModule, NgFor } from '@angular/common';
   imports:[FormsModule,NgFor,CommonModule],
   templateUrl: './messaging.component.html',
   styleUrls: ['./messaging.component.css'],
+  inputs: ['conversationId']
 })
 export class MessagingComponent implements OnInit {
   conversation: Conversation | null = null;
   newMessage = '';
+  conversationId: string | null = null;
+
 
   constructor(
     private route: ActivatedRoute,
@@ -23,18 +26,23 @@ export class MessagingComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    const conversationId = this.route.snapshot.paramMap.get('id');
-    if (conversationId) {
-      this.conversation = await this.conversationService.getConversation(conversationId);
+    if ( !this.conversationId ) {
+      this.route.queryParamMap.subscribe((params) => this.conversationId = params.get('id'));
+      if (this.conversationId) {
+        this.conversation = await this.conversationService.getConversation(this.conversationId);
+        console.log(this.conversation);
+      } else {
+        console.error('No conversation ID provided');
+      }
     }
   }
 
   async sendMessage() {
     if (this.conversation && this.newMessage.trim()) {
-      await this.conversationService.sendMessage(this.conversation.id!, this.newMessage);
+      await this.conversationService.sendMessage(this.conversationId!, this.newMessage);
       this.newMessage = '';
       // Refresh the conversation to show the new message
-      this.conversation = await this.conversationService.getConversation(this.conversation.id!);
+      this.conversation = await this.conversationService.getConversation(this.conversationId!);
     }
   }
 }
