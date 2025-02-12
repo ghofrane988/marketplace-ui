@@ -98,10 +98,9 @@ export class ProductDetailsComponent implements OnInit {
         this.product.id!,
         this.seller.uid
       );
-      this.router.navigate([
-        '/conversation',
-        { queryParams: { id: conversationId } },
-      ]);
+      this.router.navigate(['/messaging'], {
+        queryParams: { id: conversationId },
+      });
     }
   }
   redirectToLogin() {
